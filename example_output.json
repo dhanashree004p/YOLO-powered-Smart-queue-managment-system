@@ -1,0 +1,39 @@
+{
+  "type": "frame",
+  "frame_index": 150,
+  "total_frames": 5000,
+  "stage": "Alert Evaluation",
+  "metrics": {
+    "total_people": 12,
+    "active_queue_length": 8,
+    "estimated_wait_time_sec": 45,
+    "alert": true,
+    "queue_metrics": {
+      "Queue_1": {
+        "name": "Queue_1",
+        "count": 5,
+        "avg_service_time": 6.2,
+        "est_wait_time": 31.0,
+        "alert": true,
+        "member_ids": [101, 102, 103, 104, 105],
+        "cashier_ids": [101]
+      },
+      "Queue_2": {
+        "name": "Queue_2",
+        "count": 3,
+        "avg_service_time": 4.5,
+        "est_wait_time": 13.5,
+        "alert": false,
+        "member_ids": [201, 202, 203],
+        "cashier_ids": []
+      }
+    },
+    "session": {
+      "max_queue_length": 10,
+      "avg_queue_length": 6.5,
+      "total_unique_people": 45
+    },
+    "timestamp_ms": 1715431200000
+  },
+  "frame_b64": "..."
+}
