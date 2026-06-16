@@ -1,8 +1,12 @@
 ultralytics
-opencv-python
+opencv-python-headless
 numpy
 scikit-learn
 torch
 fastapi
 uvicorn
 python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+python-multipart
+requests
