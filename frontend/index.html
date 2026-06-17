@@ -1,17 +1,13 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Smart Queue Dashboard</title>
-
-    <!-- Fixed CSS Path -->
-    <link rel="stylesheet" href="styles.css"/>
-
+    <link rel="stylesheet" href="/static/styles.css"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
-<body>
+  </head>
+  <body>
     <header class="header">
       <h1>Smart Queue Monitoring</h1>
       <div style="display:flex;gap:16px;align-items:center;">
@@ -19,13 +15,9 @@
         <div id="alertBadge" class="badge">OK</div>
         <div class="notification-container">
           <button id="notificationBtn" class="notification-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             <span id="notificationBadge" class="notification-badge" style="display:none;">0</span>
           </button>
-
           <div id="notificationDropdown" class="notification-dropdown" style="display:none;">
             <div class="notification-header">Notifications</div>
             <div id="notificationList" class="notification-list">
@@ -33,23 +25,162 @@
             </div>
           </div>
         </div>
-
-        <button id="logoutBtn" style="display:none;background:transparent;border:1px solid var(--muted);font-size:0.8rem;padding:4px 12px;">
-          Logout
-        </button>
+        <button id="logoutBtn" style="display:none;background:transparent;border:1px solid var(--muted);font-size:0.8rem;padding:4px 12px;">Logout</button>
       </div>
     </header>
+    <div id="loginOverlay" class="login-overlay">
+      <div class="login-box">
+        <h2>Admin Login</h2>
+        <form id="loginForm">
+          <input type="text" id="username" placeholder="Username" required />
+          <input type="password" id="password" placeholder="Password" required />
+          <button type="submit">Login</button>
+          <p id="loginError" style="color:var(--danger);margin-top:10px;display:none;">Invalid credentials</p>
+        </form>
+      </div>
+    </div>
+    <main class="grid">
+      <!-- LEFT COLUMN -->
+      <div class="column-left">
+        <section class="panel panel-video">
+          <h2>Video Processing</h2>
+          <div style="margin-bottom:20px;display:flex;gap:12px;">
+            <input id="fileInput" type="file" accept=".mp4,.avi" style="display:none"/>
+            <button id="uploadBtn">Upload Video</button>
+            <button id="startBtn" disabled>Start Processing</button>
+            <button id="pauseBtn" style="display:none">Pause</button>
+            <button id="resumeBtn" style="display:none">Resume</button>
+            <button id="stopBtn" style="display:none">Stop</button>
+          </div>
+          <div class="video-container">
+            <div id="videoPlaceholder" class="video-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                <line x1="7" y1="2" x2="7" y2="22"></line>
+                <line x1="17" y1="2" x2="17" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+              </svg>
+              <p>Upload a video to start</p>
+            </div>
+            <img id="processedFrame" alt="Processed Frame" style="display:none"/>
+            <canvas id="roiCanvas" style="display:none;"></canvas>
+          </div>
+          
+          <div class="roi-controls">
+            <div class="roi-mode-selection">
+              <label>
+                <input type="checkbox" id="roiManualCheckbox" checked> Manual ROI
+              </label>
+              <label>
+                <input type="checkbox" id="roiAutoCheckbox"> Auto ROI
+              </label>
+            </div>
+            <input id="roiQueueName" type="text" value="Queue_1" placeholder="Queue name" style="flex:0 0 100px;padding:8px;border:1px solid var(--border);border-radius:8px;background:#0b0f19;color:#fff;font-size:0.8rem;"/>
+            <div style="display:flex;gap:8px;">
+              <button id="roiQueueBtn">Draw Queue</button>
+              <button id="roiCashierBtn">Draw Cashier</button>
+              <button id="roiClearBtn">Clear</button>
+              <button id="roiSaveBtn" style="background:rgba(255,255,255,0.05);border-color:var(--border);">Save ROIs</button>
+            </div>
+          </div>
+        </section>
 
-    <!-- KEEP ALL YOUR EXISTING HTML HERE EXACTLY AS IT IS -->
+        <section class="panel">
+          <h2>Session Summary</h2>
+          <div class="metrics metrics-3">
+            <div class="metric">
+              <div class="label">Peak Queue</div>
+              <div id="sessionMaxQueue" class="value">0</div>
+            </div>
+            <div class="metric">
+              <div class="label">Avg Queue</div>
+              <div id="sessionAvgQueue" class="value">0</div>
+            </div>
+            <div class="metric">
+              <div class="label">Unique Visitors</div>
+              <div id="sessionUnique" class="value">0</div>
+            </div>
+          </div>
+        </section>
 
+        <section class="panel">
+          <h2>Queue Trend</h2>
+          <div style="height: 250px; position: relative;">
+              <canvas id="queueChart"></canvas>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Queue Analytics</h2>
+          <div id="queuesContainer" class="analytics-grid"></div>
+          <h3>History (Last 20)</h3>
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Total</th>
+                <th>Queue</th>
+                <th>EWT</th>
+                <th>Alert</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="column-right">
+        <section class="panel">
+          <h2>Processing Status</h2>
+          <div class="metrics metrics-1">
+            <div class="metric" style="margin-bottom:16px;">
+              <div class="label">Current Frame</div>
+              <div id="currentFrame" class="value">0</div>
+            </div>
+            <div class="metric" style="margin-bottom:16px;">
+              <div class="label">Total Frames</div>
+              <div id="totalFrames" class="value">0</div>
+            </div>
+            <div class="metric">
+              <div class="label">Pipeline Stage</div>
+              <div id="currentStage" class="value">Idle</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Real-Time Metrics</h2>
+          <div class="metrics metrics-1">
+            <div class="metric" style="margin-bottom:16px;">
+              <div class="label">Total People</div>
+              <div id="totalPeople" class="value">0</div>
+            </div>
+            <div class="metric" style="margin-bottom:16px;">
+              <div class="label">Active Queue Length</div>
+              <div id="queueLen" class="value">0</div>
+            </div>
+            <div class="metric" style="margin-bottom:16px;">
+              <div class="label">Estimated Waiting Time</div>
+              <div id="ewt" class="value">0s</div>
+            </div>
+            <div class="metric" style="margin-bottom:16px;">
+              <div class="label">Throughput</div>
+              <div id="throughput" class="value">0/min</div>
+            </div>
+            <div class="metric">
+              <div class="label">Alert Status</div>
+              <div id="alertStatus" class="value">OK</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
     <footer class="footer">
       <div>
         Thresholds are configurable via /config endpoint.
       </div>
     </footer>
-
-    <!-- Fixed JS Path -->
-    <script src="script.js"></script>
-
-</body>
+    <script src="/static/script.js"></script>
+  </body>
 </html>
